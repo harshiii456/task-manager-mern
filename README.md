@@ -85,7 +85,9 @@ npm install
 ## Instructions for Running the Application
 
 ### 1. Start MongoDB
-Ensure MongoDB is running on your system:
+
+**Option A: Local MongoDB Installation**
+If you have MongoDB installed locally, ensure it's running:
 ```bash
 # On Windows (if using MongoDB as a service)
 net start MongoDB
@@ -93,6 +95,19 @@ net start MongoDB
 # Or if running manually
 mongod
 ```
+
+**Option B: MongoDB Atlas (Cloud Database)**
+If you don't have MongoDB installed locally, use MongoDB Atlas (free tier):
+1. Go to https://www.mongodb.com/cloud/atlas/register and create a free account
+2. Create a new cluster (free tier)
+3. Create a database user with username and password
+4. Whitelist your IP address (or use 0.0.0.0/0 for development)
+5. Get your connection string from the "Connect" button
+6. Update your `backend/.env` file with:
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/taskmanager?retryWrites=true&w=majority
+```
+Replace `<username>` and `<password>` with your actual MongoDB Atlas credentials.
 
 ### 2. Start the Backend Server
 ```bash
