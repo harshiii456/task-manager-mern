@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const Task = require('../models/Task');
+const db = require('../database/memory');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
@@ -20,14 +20,22 @@ router.get('/', auth, async (req, res) => {
       query.priority = priority;
     }
 
-    let sortOption = { createdAt: -1 };
+    const tasks = await db.findTasks(query);
+    
+    // Sort tasks
     if (sort === 'priority') {
-      sortOption = { priority: -1 };
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
     } else if (sort === 'dueDate') {
-      sortOption = { dueDate: 1 };
+      tasks.sort((a, b) => {
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        return new Date(a.dueDate) - new Date(b.dueDate);
+      });
+    } else {
+      tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
-
-    const tasks = await Task.find(query).sort(sortOption);
+    
     res.json({ tasks, count: tasks.length });
   } catch (error) {
     console.error('Get tasks error:', error);
@@ -38,9 +46,9 @@ router.get('/', auth, async (req, res) => {
 // Get single task
 router.get('/:id', auth, async (req, res) => {
   try {
-    const task = await Task.findOne({ _id: req.params.id, user: req.user._id });
+    const task = await db.findTaskById(req.params.id);
     
-    if (!task) {
+    if (!task || task.user !== req.user._id) {
       return res.status(404).json({ error: 'Task not found' });
     }
     
@@ -68,7 +76,7 @@ router.post('/', auth, [
 
     const { title, description, status, priority, dueDate } = req.body;
 
-    const task = new Task({
+    const task = await db.createTask({
       title,
       description,
       status: status || 'pending',
@@ -77,7 +85,6 @@ router.post('/', auth, [
       user: req.user._id
     });
 
-    await task.save();
     res.status(201).json({ message: 'Task created successfully', task });
   } catch (error) {
     console.error('Create task error:', error);
@@ -109,15 +116,12 @@ router.put('/:id', auth, [
       }
     });
 
-    const task = await Task.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id },
-      updates,
-      { new: true, runValidators: true }
-    );
-
-    if (!task) {
+    const existingTask = await db.findTaskById(req.params.id);
+    if (!existingTask || existingTask.user !== req.user._id) {
       return res.status(404).json({ error: 'Task not found' });
     }
+
+    const task = await db.updateTask(req.params.id, updates);
 
     res.json({ message: 'Task updated successfully', task });
   } catch (error) {
@@ -129,11 +133,12 @@ router.put('/:id', auth, [
 // Delete task
 router.delete('/:id', auth, async (req, res) => {
   try {
-    const task = await Task.findOneAndDelete({ _id: req.params.id, user: req.user._id });
-    
-    if (!task) {
+    const existingTask = await db.findTaskById(req.params.id);
+    if (!existingTask || existingTask.user !== req.user._id) {
       return res.status(404).json({ error: 'Task not found' });
     }
+
+    await db.deleteTask(req.params.id);
     
     res.json({ message: 'Task deleted successfully' });
   } catch (error) {

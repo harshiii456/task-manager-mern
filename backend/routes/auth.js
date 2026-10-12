@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
+const db = require('../database/memory');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
@@ -21,14 +21,13 @@ router.post('/register', [
     const { username, email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await db.findUserByEmail(email) || await db.findUserByUsername(username);
     if (existingUser) {
       return res.status(400).json({ error: 'User with this email or username already exists' });
     }
 
     // Create new user
-    const user = new User({ username, email, password });
-    await user.save();
+    const user = await db.createUser({ username, email, password });
 
     // Generate token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -62,13 +61,13 @@ router.post('/login', [
     const { email, password } = req.body;
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await db.findUserByEmail(email);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Check password
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await db.comparePassword(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -94,11 +93,15 @@ router.post('/login', [
 // Get current user
 router.get('/me', auth, async (req, res) => {
   try {
+    const user = await db.findUserById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
     res.json({
       user: {
-        id: req.user._id,
-        username: req.user.username,
-        email: req.user.email
+        id: user._id,
+        username: user.username,
+        email: user.email
       }
     });
   } catch (error) {
