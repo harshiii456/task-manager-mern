@@ -86,7 +86,15 @@ npm install
 
 ### 1. Start MongoDB
 
-**Option A: Local MongoDB Installation**
+**Option A: In-Memory Database (Recommended for Quick Testing)**
+The application currently uses an in-memory database by default, which requires no MongoDB installation. This is perfect for:
+- Quick demonstrations
+- Testing functionality
+- Development without database setup
+
+**Note**: Data stored in-memory will be lost when the backend server restarts.
+
+**Option B: Local MongoDB Installation**
 If you have MongoDB installed locally, ensure it's running:
 ```bash
 # On Windows (if using MongoDB as a service)
@@ -96,7 +104,7 @@ net start MongoDB
 mongod
 ```
 
-**Option B: MongoDB Atlas (Cloud Database)**
+**Option C: MongoDB Atlas (Cloud Database)**
 If you don't have MongoDB installed locally, use MongoDB Atlas (free tier):
 1. Go to https://www.mongodb.com/cloud/atlas/register and create a free account
 2. Create a new cluster (free tier)
@@ -131,6 +139,8 @@ Open your browser and navigate to `http://localhost:3000`
 ```
 windsurf-project-3/
 ├── backend/
+│   ├── database/
+│   │   └── memory.js        # In-memory database implementation
 │   ├── models/
 │   │   ├── User.js          # User schema with password hashing
 │   │   └── Task.js          # Task schema with indexes
