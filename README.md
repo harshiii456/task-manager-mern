@@ -159,6 +159,14 @@ The application is deployed using Render's free tier with two separate services:
 
 **Note**: Render's free tier services spin down after 15 minutes of inactivity and take ~30 seconds to wake up on first request. This is normal behavior for the free tier.
 
+## Application Screenshots
+
+### Dashboard View
+![Dashboard](screenshots/dashboard.png.png)
+
+### Task Management
+![Tasks](screenshots/tasks.png.png)
+
 ## Project Structure
 
 ```
