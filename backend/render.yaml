@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: task-manager-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: taskmanager_secret_key_2024
+      - key: NODE_ENV
+        value: production
