@@ -134,6 +134,31 @@ The frontend will run on `http://localhost:3000`
 ### 4. Access the Application
 Open your browser and navigate to `http://localhost:3000`
 
+## Deployed Application
+
+The application is deployed on Render and can be accessed at:
+
+- **Frontend**: https://task-manager-frontend-kb16.onrender.com
+- **Backend API**: https://task-manager-mern-dc8s.onrender.com/api
+
+### Deployment Details
+
+The application is deployed using Render's free tier with two separate services:
+
+1. **Backend Service** (task-manager-mern-dc8s)
+   - Runtime: Node.js
+   - Database: In-memory database (data resets on server restart)
+   - Port: 10000
+   - Status: Live
+
+2. **Frontend Service** (task-manager-frontend-kb16)
+   - Runtime: Node.js with Vite
+   - Build: Static files served with `serve`
+   - Port: 10000
+   - Status: Live
+
+**Note**: Render's free tier services spin down after 15 minutes of inactivity and take ~30 seconds to wake up on first request. This is normal behavior for the free tier.
+
 ## Project Structure
 
 ```
